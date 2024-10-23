@@ -39,6 +39,14 @@ router.post('/register', upload.single('userImage'), async (req, res) => {
 // Fix login route typo and error handling
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
+    
+    // Use JWT_SECRET from environment variables
+    const JWT_SECRET = process.env.JWT_SECRET;
+
+    if (!JWT_SECRET) {
+        return res.status(500).json({ message: 'JWT_SECRET is not defined' });
+    }
+
     try {
         const user = await User.findOne({ username });
         if (!user) return res.status(400).json({ message: 'User not found' });
@@ -52,4 +60,5 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
 module.exports = router;

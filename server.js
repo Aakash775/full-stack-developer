@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require ('cors');
 const userRoutes = require('./routes/userRoutes');
 const path = require('path');
-
+require('dotenv').config(); 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
