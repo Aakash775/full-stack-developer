@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const router = express.Router();
 const User = require('../models/User');
-
+const Product = require('../models/Product');
 // Multer Configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -60,5 +60,71 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// Product Api
+
+router.post('/upload-product', upload.single('productImage'),
+async (req, res) => {
+    const {
+        name, description, price
+    } = req.body;
+    const productImage = req.file ? req.file.path : null;
+    try {
+        const newProduct = new 
+        Product({
+            name,
+            description,
+            price,
+            productImage,
+            user: req.user.id
+        });
+        await newProduct.save();
+        res.json({message : 'Product Upload Successfully'});
+    }catch  (err){
+            res.status(500).json({error: err.message});
+        
+    };
+});
+
+//Middelware to verify token and attache user
+const authMiddleware = (req, res, 
+    next) => {
+    const token = 
+    req.header('x-auth-token');
+    if (!token) return
+    res.status(401).json({message: 'No token, authorization denied' });
+    try{
+        const decode = jwt.verify(token, JWT_SECRET);
+        req.user = decode;
+       // user Data attached
+       next();
+    }catch (err){
+        res.status(401).json({message: 'Token is not valid'});
+    }
+};
+
+// Protect Product upload route with auth middleware
+
+router.post('/upload-product', authMiddleware, upload.single('productImage')),
+async (req, res) =>{
+    const {name, description, price} = req.body;
+    const productImage = req.file ? req.file.path:null;
+
+    try {
+        const newProduct = new
+        Product ({
+            name,
+            description,
+            price,
+            productImage,
+            user: req.user.id
+        });
+        await newProduct.save();
+        res.json ({message: 'Product uploaded successfully'});
+
+    }catch (err) {
+        res.status(500).json({error: err.message});
+    }
+};
 
 module.exports = router;
