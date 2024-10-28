@@ -1,27 +1,33 @@
+require('dotenv').config(); // Load environment variables first
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const cors = require ('cors');
+const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const path = require('path');
-require('dotenv').config(); 
+
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-//DB Connection
-mongoose.connect('mongodb://localhost:27017/userAuthDB' ,{
-    useNewUrlParser:true,
+// Verify JWT_SECRET loading
+if (!process.env.JWT_SECRET) {
+    console.error('JWT_SECRET is not set in the environment variables.');
+    process.exit(1);
+}
+
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(()=> console.log("MongoDB Connected"))
-.catch(err=> console.log(err));
+})
+    .then(() => console.log("MongoDB Connected"))
+    .catch(err => console.log(err));
 
-//user Routes
-
+// Routes
 app.use('/user', userRoutes);
-//console.log(user);
-//Start Server
 
+// Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
