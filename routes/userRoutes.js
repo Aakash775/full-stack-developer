@@ -87,4 +87,28 @@ router.post('/product', authMiddleware, upload.single('productImage'), async (re
     }
 });
 
+//Get Product Details
+// Get Product Details
+router.get('/product', authMiddleware, async (req, res) => {
+    try {
+        // Check if user ID is available
+        if (!req.user || !req.user.id) {
+            return res.status(400).json({ message: 'User ID not found in request' });
+        }
+
+        // Fetch products associated with the authenticated user
+        const products = await Product.find({ user: req.user.id });
+        
+        if (!products.length) {
+            return res.status(404).json({ message: 'No products found for this user' });
+        }
+        
+        res.json(products);
+    } catch (err) {
+        console.error('Error fetching products:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
 module.exports = router;
