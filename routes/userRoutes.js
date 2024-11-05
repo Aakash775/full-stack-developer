@@ -87,7 +87,6 @@ router.post('/product', authMiddleware, upload.single('productImage'), async (re
     }
 });
 
-//Get Product Details
 // Get Product Details
 router.get('/product', authMiddleware, async (req, res) => {
     try {
@@ -109,6 +108,34 @@ router.get('/product', authMiddleware, async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// Delete product by ID
+
+router.delete('/product/:id', authMiddleware, async(req, res) =>
+   {
+    try{
+        const products = await 
+        Product.findById(req.params.id);
+
+        if (!products){
+            return
+            res.status(404).json({message: 'Product not found'});
+        }
+        if(products.user.toString() != req.user.id){
+            return
+            res.status(403).json({message: 'unAthorizeuser'});
+        }
+
+        await products.remove();
+
+        res.json({message:'Product Deleted Succesfully'});
+
+
+    } catch (err) {
+        res.status(500).json({error: err.message});
+    }
+   });
+
 
 
 module.exports = router;
